@@ -38,8 +38,9 @@ size_t	get_time(struct timeval t1)
 void	function_death_print(t_philo *tmp)
 {
 	pthread_mutex_lock(&tmp->print);
-	if (tmp->flag_print == 1)
+	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu \033[1;31mdied\033[0m\n", get_time(tmp->start_time), tmp->number);
+	g_data.flag_print = 0;
 	pthread_mutex_unlock(&tmp->death);
 	usleep(g_data.quantity_philo * 100);
 	pthread_mutex_unlock(&tmp->print);
@@ -77,7 +78,7 @@ void	function_eating(t_philo *tmp)
 {
 	pthread_mutex_lock(&tmp->fork[tmp->number - 1]);
 	pthread_mutex_lock(&tmp->print);
-	if (tmp->flag_print == 1)
+	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu has taken a fork\n", get_time(tmp->start_time), tmp->number);
 	pthread_mutex_unlock(&tmp->print);
 	if (tmp->number != g_data.quantity_philo)
@@ -85,12 +86,12 @@ void	function_eating(t_philo *tmp)
 	else
 		pthread_mutex_lock(&tmp->fork[0]);
 	pthread_mutex_lock(&tmp->print);
-	if (tmp->flag_print == 1)
+	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu has taken a fork\n", get_time(tmp->start_time), tmp->number);
 	pthread_mutex_unlock(&tmp->print);
 	gettimeofday(&tmp->start_proc, NULL);
 	pthread_mutex_lock(&tmp->print);
-	if (tmp->flag_print == 1)
+	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu is eating\n", get_time(tmp->start_time), tmp->number);
 	pthread_mutex_unlock(&tmp->print);
 	while (g_data.time_to_eat > get_time(tmp->start_proc))
@@ -108,7 +109,7 @@ void	function_sleep(t_philo *tmp)
 
 	gettimeofday(&start_sleep, NULL);
 	pthread_mutex_lock(&tmp->print);
-	if (tmp->flag_print == 1)
+	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu is sleeping\n", get_time(tmp->start_time), tmp->number);
 	pthread_mutex_unlock(&tmp->print);
 	while (g_data.time_to_sleep > get_time(start_sleep))
@@ -119,7 +120,7 @@ void	function_think(t_philo *tmp)
 {
 	// lock
 	pthread_mutex_lock(&tmp->print);
-	if (tmp->flag_print == 1)
+	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu is thinking\n", get_time(tmp->start_time), tmp->number);
 	pthread_mutex_unlock(&tmp->print);
 	// unlock
@@ -151,6 +152,8 @@ void	*function_philo_one(void *star)
 		function_sleep(tmp);
 		function_think(tmp);
 	}
+	// if (g_data.number_of_eat > 0)
+	// 	pthread_mutex_unlock(&tmp->death);
 	tmp->life = 0;
 	pthread_join(one, NULL);
 	pthread_join(two, NULL);
@@ -191,6 +194,7 @@ int	main(int ac, char **av)
 	stop_eating = malloc(g_data.quantity_philo * sizeof(pthread_mutex_t));
 
 	tmp = g_data.philo;
+	g_data.flag_print = 1;
 	pthread_mutex_lock(&death);
 	while (i < g_data.quantity_philo)
 	{

@@ -30,7 +30,7 @@ typedef struct	s_data
 	size_t	time_to_sleep;
 	size_t	number_of_eat;
 	t_philo	*philo;
-
+	short int	flag_print;
 }				t_data;
 
 
