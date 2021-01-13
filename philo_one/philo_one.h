@@ -8,15 +8,17 @@
 typedef struct	s_philo_one
 {
 	pthread_mutex_t *fork;
-	pthread_mutex_t *print;
-	pthread_mutex_t *death;
-	
+	pthread_mutex_t print;
+	pthread_mutex_t death;
+	pthread_mutex_t	stop_eating;
+
 	pthread_t		*thread;
 	short int		life;
 	struct timeval	start_time;
 	size_t			time_of_life;
 	size_t			number;
 	struct timeval	start_proc;
+	size_t			count_eating;
 }				t_philo;
 
 typedef struct	s_data

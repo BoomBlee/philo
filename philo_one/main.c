@@ -14,19 +14,18 @@ int	parse_argv(int ac, char **av)
 	if (ac != 5 && ac != 6)
 		return (error_exit("error argv\n"));
 	if ((g_data.quantity_philo = ft_atoi(av[1])) < 2)
-		return (error_exit("philo <= 1\n"));
+		return (error_exit("wrong number of philo\n"));
 	if ((g_data.time_to_die = ft_atoi(av[2])) < 1)
-		return (error_exit("time to die < 1\n"));
+		return (error_exit("wrong time to die\n"));
 	if ((g_data.time_to_eat = ft_atoi(av[3])) < 1)
-		return (error_exit("time to eat < 1\n"));
+		return (error_exit("wrong time to eat\n"));
 	if ((g_data.time_to_sleep = ft_atoi(av[4])) < 1)
-		return (error_exit("time to sleep < 1\n"));
+		return (error_exit("wrong time to sleep\n"));
 	if (ac == 6)
 		if ((g_data.number_of_eat = ft_atoi(av[5])) < 1)
-			return (error_exit("number of eat < 1\n"));
-	return 0;
+			return (error_exit("wrong number of eat\n"));
+	return (0);
 }
-
 
 size_t	get_time(struct timeval t1)
 {
@@ -38,7 +37,7 @@ size_t	get_time(struct timeval t1)
 
 void	function_death_print(t_philo *tmp)
 {
-	pthread_mutex_unlock(tmp->death);
+	pthread_mutex_unlock(&tmp->death);
 	printf("%lu %lu died\n", get_time(tmp->start_time), tmp->number);
 }
 
@@ -63,10 +62,10 @@ void	*stop(void *two)
 	t_philo		*tmp;
 
 	tmp = two;
-	pthread_mutex_lock(tmp->death);
+	pthread_mutex_lock(&tmp->death);
 	tmp->life = 0;
-	pthread_mutex_unlock(tmp->death);
-	return 0;
+	pthread_mutex_unlock(&tmp->death);
+	return (0);
 }
 
 void	function_eating(t_philo *tmp)
@@ -109,7 +108,9 @@ void	*function_philo_one(void *star)
 	t_philo		*tmp;
 	pthread_t	one;
 	pthread_t	two;
+	size_t		count_eat;
 
+	count_eat = 0;
 	tmp = star;
 	tmp->start_proc = tmp->start_time;
 	while (tmp->number % 2 && get_time(tmp->start_proc) < g_data.time_to_eat)
@@ -120,11 +121,26 @@ void	*function_philo_one(void *star)
 	while (tmp->life == 1)
 	{
 		function_eating(tmp);
+		if (++count_eat == g_data.number_of_eat)
+		{
+			pthread_mutex_unlock(&tmp->death);
+			break ;
+		}
 		function_sleep(tmp);
 		function_think(tmp);
 	}
+	tmp->life = 0;
 	pthread_join(one, NULL);
 	pthread_join(two, NULL);
+	return (NULL);
+}
+
+void	*function_stop_eat(void *pid)
+{
+	t_philo		*tmp;
+
+	tmp = pid;
+	pthread_mutex_lock(&tmp->stop_eating);
 	return (NULL);
 }
 
@@ -135,11 +151,13 @@ int	main(int ac, char **av)
 	pthread_mutex_t	death;
 	pthread_mutex_t	print;
 	pthread_mutex_t	*fork;
+	pthread_mutex_t	*stop_eating;
+	pthread_t		stopped;
 
 	i = 0;
 	if (parse_argv(ac, av) == -1)
-		return -1;
-	printf("philo=%ld, die=%ld, eat=%ld, sleep=%ld\n", g_data.quantity_philo, g_data.time_to_die, g_data.time_to_eat, g_data.time_to_sleep);
+		return (-1);
+	// printf("philo=%ld, die=%ld, eat=%ld, sleep=%ld\n", g_data.quantity_philo, g_data.time_to_die, g_data.time_to_eat, g_data.time_to_sleep);
 	g_data.philo = malloc(g_data.quantity_philo * sizeof(t_philo));
 
 	fork = malloc(g_data.quantity_philo * sizeof(pthread_mutex_t));
@@ -147,27 +165,32 @@ int	main(int ac, char **av)
 
 	pthread_mutex_init(&death, NULL);
 	pthread_mutex_init(&print, NULL);
+	
+	stop_eating = malloc(g_data.quantity_philo * sizeof(pthread_mutex_t));
 
 	tmp = g_data.philo;
 	pthread_mutex_lock(&death);
 	while (i < g_data.quantity_philo)
 	{
 		tmp[i].fork = fork;
-		pthread_mutex_init(&tmp->fork[i], NULL);//
+		tmp[i].stop_eating = stop_eating[i];
+		pthread_mutex_init(&tmp[i].stop_eating, NULL);//
+		pthread_mutex_init(&tmp[i].fork[i], NULL);//
 		gettimeofday(&tmp[i].start_time, NULL);
 		tmp[i].number = i + 1;
 		tmp[i].life = 1;
-		tmp[i].death = &death;
-		tmp[i].print = &print;
+		tmp[i].death = death;
+		tmp[i].print = print;
 		tmp[i].time_of_life = g_data.time_to_die;
 		pthread_create(&g_data.philo->thread[i], NULL, function_philo_one, &tmp[i]);
 		++i;
 	}
 	i = 0;
+	pthread_create(&stopped, NULL, function_stop_eat, tmp);
 	while (i < g_data.quantity_philo)
 	{
 		pthread_join(g_data.philo->thread[i], NULL);
 		++i;
 	}
-	return 0;
+	return (0);
 }

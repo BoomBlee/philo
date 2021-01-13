@@ -9,12 +9,12 @@ int			ft_atoi(const char *nptr)
 	res = 0;
 	i = 0;
 	if (nptr[i] == '-')
-		return (-1);
-	// if ((nptr[i] > ' ' && nptr[i] < '0') || nptr[i] > '9')
-	// 	return -1;
+		return (0);
+	if ((nptr[i] > ' ' && nptr[i] < '0') || nptr[i] > '9')
+		return (0);
 	while (nptr[i] >= '0' && nptr[i] <= '9')
 		res = res * 10 + (nptr[i++] - '0');
-	// if ((nptr[i] > ' ' && nptr[i] < '0') || nptr[i] > '9')
-	// 	return -1;
+	if ((nptr[i] > ' ' && nptr[i] < '0') || nptr[i] > '9')
+		return (0);
 	return (res);
 }
