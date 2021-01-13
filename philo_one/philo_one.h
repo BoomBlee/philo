@@ -19,6 +19,7 @@ typedef struct	s_philo_one
 	size_t			number;
 	struct timeval	start_proc;
 	size_t			count_eating;
+	short int		flag_print;
 }				t_philo;
 
 typedef struct	s_data
