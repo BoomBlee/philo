@@ -37,15 +37,15 @@ size_t	get_time(struct timeval t1)
 
 void	function_death_print(t_philo *tmp)
 {
-	pthread_mutex_lock(&tmp->print);
+	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 	{
 		g_data.flag_print = 0;
 		printf("%lu %lu \033[1;31mdied\033[0m\n", get_time(tmp->start_time), tmp->number);
 	}
-	pthread_mutex_unlock(&tmp->death);
+	sem_post(tmp->death);
 	usleep(g_data.quantity_philo * 100);
-	pthread_mutex_unlock(&tmp->print);
+	sem_post(tmp->print);
 }
 
 
@@ -69,40 +69,34 @@ void	*stop(void *two)
 	t_philo		*tmp;
 
 	tmp = two;
-	pthread_mutex_lock(&tmp->death);
+	sem_wait(tmp->death);
 	tmp->life = 0;
 	tmp->flag_print = 0;
-	pthread_mutex_unlock(&tmp->death);
+	sem_post(tmp->death);
 	return (0);
 }
 
 void	function_eating(t_philo *tmp)
 {
-	pthread_mutex_lock(&tmp->fork[tmp->number - 1]);
-	pthread_mutex_lock(&tmp->print);
+	sem_wait(tmp->fork);
+	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu has taken a fork\n", get_time(tmp->start_time), tmp->number);
-	pthread_mutex_unlock(&tmp->print);
-	if (tmp->number != g_data.quantity_philo)
-		pthread_mutex_lock(&tmp->fork[tmp->number]);
-	else
-		pthread_mutex_lock(&tmp->fork[0]);
-	pthread_mutex_lock(&tmp->print);
+	sem_post(tmp->print);
+	sem_wait(tmp->fork);
+	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu has taken a fork\n", get_time(tmp->start_time), tmp->number);
-	pthread_mutex_unlock(&tmp->print);
+	sem_post(tmp->print);
 	gettimeofday(&tmp->start_proc, NULL);
-	pthread_mutex_lock(&tmp->print);
+	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu is eating\n", get_time(tmp->start_time), tmp->number);
-	pthread_mutex_unlock(&tmp->print);
+	sem_post(tmp->print);
 	while (g_data.time_to_eat > get_time(tmp->start_proc))
 		usleep(240);
-	pthread_mutex_unlock(&tmp->fork[tmp->number - 1]);
-	if (tmp->number != g_data.quantity_philo)
-		pthread_mutex_unlock(&tmp->fork[tmp->number]);
-	else
-		pthread_mutex_unlock(&tmp->fork[0]);
+	sem_post(tmp->fork);
+	sem_post(tmp->fork);
 }
 
 void	function_sleep(t_philo *tmp)
@@ -110,22 +104,20 @@ void	function_sleep(t_philo *tmp)
 	struct timeval	start_sleep;
 
 	gettimeofday(&start_sleep, NULL);
-	pthread_mutex_lock(&tmp->print);
+	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu is sleeping\n", get_time(tmp->start_time), tmp->number);
-	pthread_mutex_unlock(&tmp->print);
+	sem_post(tmp->print);
 	while (g_data.time_to_sleep > get_time(start_sleep))
 		usleep(240);
 }
 
 void	function_think(t_philo *tmp)
 {
-	// lock
-	pthread_mutex_lock(&tmp->print);
+	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu is thinking\n", get_time(tmp->start_time), tmp->number);
-	pthread_mutex_unlock(&tmp->print);
-	// unlock
+	sem_post(tmp->print);
 }
 
 void	*function_philo_one(void *star)
@@ -148,14 +140,12 @@ void	*function_philo_one(void *star)
 		function_eating(tmp);
 		if (++count_eat == g_data.number_of_eat)
 		{
-			pthread_mutex_unlock(&tmp->death);
+			sem_post(tmp->death);
 			break ;
 		}
 		function_sleep(tmp);
 		function_think(tmp);
 	}
-	// if (g_data.number_of_eat > 0)
-	// 	pthread_mutex_unlock(&tmp->death);
 	tmp->life = 0;
 	pthread_join(one, NULL);
 	pthread_join(two, NULL);
@@ -167,7 +157,7 @@ void	*function_stop_eat(void *pid)
 	t_philo		*tmp;
 
 	tmp = pid;
-	pthread_mutex_lock(&tmp->stop_eating);
+	sem_wait(tmp->stop_eating);
 	return (NULL);
 }
 
@@ -175,10 +165,10 @@ int	main(int ac, char **av)
 {
 	size_t 	i;
 	t_philo *tmp;
-	pthread_mutex_t	death;
-	pthread_mutex_t	print;
-	pthread_mutex_t	*fork;
-	pthread_mutex_t	*stop_eating;
+	sem_t	*death;
+	sem_t	*print;
+	sem_t	*fork;
+	sem_t	*stop_eating;
 	pthread_t		stopped;
 
 	i = 0;
@@ -187,23 +177,22 @@ int	main(int ac, char **av)
 	// printf("philo=%ld, die=%ld, eat=%ld, sleep=%ld\n", g_data.quantity_philo, g_data.time_to_die, g_data.time_to_eat, g_data.time_to_sleep);
 	g_data.philo = malloc(g_data.quantity_philo * sizeof(t_philo));
 
-	fork = malloc(g_data.quantity_philo * sizeof(pthread_mutex_t));
+
+	fork = sem_open("fork", O_CREAT, S_IRWXU, g_data.quantity_philo);
+	// , O_CREAT, S_IRWXU,
+
 	g_data.philo->thread = malloc(g_data.quantity_philo * sizeof(pthread_t));
 
-	pthread_mutex_init(&death, NULL);
-	pthread_mutex_init(&print, NULL);
-	
-	stop_eating = malloc(g_data.quantity_philo * sizeof(pthread_mutex_t));
+	death = sem_open("death", O_CREAT, S_IRWXU, 0);
+	print = sem_open("print", O_CREAT, S_IRWXU, 1);
+	stop_eating = sem_open("stop_eating", O_CREAT, S_IRWXU, 0);
 
 	tmp = g_data.philo;
 	g_data.flag_print = 1;
-	pthread_mutex_lock(&death);
 	while (i < g_data.quantity_philo)
 	{
 		tmp[i].fork = fork;
 		tmp[i].stop_eating = stop_eating[i];
-		pthread_mutex_init(&tmp[i].stop_eating, NULL);//
-		pthread_mutex_init(&tmp[i].fork[i], NULL);//
 		gettimeofday(&tmp[i].start_time, NULL);
 		tmp[i].flag_print = 1;
 		tmp[i].number = i + 1;
