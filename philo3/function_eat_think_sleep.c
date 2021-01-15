@@ -6,21 +6,19 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 07:37:36 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 09:21:35 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/15 09:24:25 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo_two.h"
+#include "philo_three.h"
 
 static void		function_eating(t_philo *tmp)
 {
-	sem_wait(tmp->fork);
 	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu has taken a fork\n", get_time(tmp->start_time),
 		tmp->number);
 	sem_post(tmp->print);
-	sem_wait(tmp->fork);
 	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu has taken a fork\n", get_time(tmp->start_time),
@@ -33,8 +31,6 @@ static void		function_eating(t_philo *tmp)
 	sem_post(tmp->print);
 	while (g_data.time_to_eat > get_time(tmp->start_proc))
 		usleep(240);
-	sem_post(tmp->fork);
-	sem_post(tmp->fork);
 }
 
 static void		function_sleep(t_philo *tmp)
@@ -66,7 +62,7 @@ static	void	*castil(t_philo *tmp, pthread_t one, pthread_t two)
 	return (NULL);
 }
 
-void			*function_philo_two(void *star)
+void			*function_philo_three(void *star)
 {
 	t_philo		*tmp;
 	pthread_t	one;
@@ -85,12 +81,10 @@ void			*function_philo_two(void *star)
 	{
 		function_eating(tmp);
 		if (++count_eat == g_data.number_of_eat)
-		{
-			sem_post(tmp->death);
 			break ;
-		}
 		function_sleep(tmp);
 		function_think(tmp);
 	}
+	sem_post(tmp->stop_eating);
 	return (castil(tmp, one, two));
 }
