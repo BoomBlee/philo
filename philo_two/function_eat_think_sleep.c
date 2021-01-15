@@ -6,7 +6,7 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 07:37:36 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 09:21:35 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/16 01:57:18 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,5 +92,6 @@ void			*function_philo_two(void *star)
 		function_sleep(tmp);
 		function_think(tmp);
 	}
+	// sem_post(tmp->stop_eating);
 	return (castil(tmp, one, two));
 }

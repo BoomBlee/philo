@@ -6,7 +6,7 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 07:37:43 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 07:37:44 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/16 01:57:27 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,12 @@ void	*stop(void *two)
 void	*function_stop_eat(void *pid)
 {
 	t_philo		*tmp;
+	size_t		i;
 
 	tmp = pid;
-	sem_wait(tmp->stop_eating);
+	i = 0;
+	while (i++ < g_data.quantity_philo)
+		sem_wait(tmp->stop_eating);
+	sem_post(tmp->death);
 	return (NULL);
 }
