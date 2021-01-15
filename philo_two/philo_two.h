@@ -6,7 +6,7 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 07:37:48 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 08:02:19 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/15 22:54:57 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,6 @@ int					parse_argv(int ac, char **av);
 */
 int					free_malloc(void);
 int					delete_sem(void);
-void				init_tmp(t_philo *tmp, sem_t *fork, sem_t *stop_eating,
-						size_t i);
 int					create_sem(sem_t *fork, sem_t *stop_eating);
 /*
 *******************  malloc_init.c  *******************

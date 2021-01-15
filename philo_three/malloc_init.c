@@ -6,7 +6,7 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 07:37:32 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 09:43:10 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/15 22:44:41 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,21 +21,13 @@ int		ft_allocate(pid_t **pid)
 		free(*pid);
 		return (-1);
 	}
-	if (!(g_data.philo->thread = malloc(g_data.quantity_philo * sizeof(pthread_t))))
+	if (!(g_data.philo->thread = malloc(g_data.quantity_philo
+	* sizeof(pthread_t))))
 	{
 		free(*pid);
 		free(g_data.philo);
 		return (-1);
 	}
-	return (0);
-}
-
-int		delete_sem(void)
-{
-	sem_unlink("death");
-	sem_unlink("print");
-	sem_unlink("stop_eating");
-	g_data.flag_print = 1;
 	return (0);
 }
 
@@ -68,7 +60,6 @@ int		create_sem(pid_t *pid, sem_t *stop_eating)
 	print = sem_open("print", O_CREAT, S_IRWXU, 1);
 	stop_eating = sem_open("stop_eating", O_CREAT, S_IRWXU, 0);
 	tmp = g_data.philo;
-	g_data.flag_print = 1;
 	while (i < g_data.quantity_philo)
 	{
 		init_tmp(&tmp[i], stop_eating, i);
@@ -77,14 +68,10 @@ int		create_sem(pid_t *pid, sem_t *stop_eating)
 		gettimeofday(&tmp[i].start_time, NULL);
 		pid[i] = fork();
 		if (pid[i] < 0)
-			return (-1);//free malloc
+			return (delete_pid(pid, i));
 		else if (pid[i] == 0)
-		{
-			function_philo_three(&tmp[i]);
-			exit (0);
-		}
+			function_philo_three(&tmp[i]) ? exit(0) : exit(0);
 		++i;
 	}
-	pthread_create(&stopped, NULL, function_stop_eat, tmp);
-	return (0);
+	return (pthread_create(&stopped, NULL, function_stop_eat, tmp));
 }

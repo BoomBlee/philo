@@ -1,23 +1,36 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strlen.c                                        :+:      :+:    :+:   */
+/*   delete.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/01/07 18:40:04 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/07 18:40:08 by kcaraway         ###   ########.fr       */
+/*   Created: 2021/01/15 22:44:10 by kcaraway          #+#    #+#             */
+/*   Updated: 2021/01/15 22:47:40 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
+#include "philo_three.h"
 
-size_t	ft_strlen(const char *str)
+int		delete_pid(pid_t *pid, size_t last)
 {
 	size_t i;
 
 	i = 0;
-	while (str[i])
-		i++;
-	return (i);
+	sem_post(g_data.philo->death);
+	while (i < last)
+	{
+		waitpid(pid[i], NULL, 0);
+		++i;
+	}
+	return (1);
+}
+
+int		delete_sem(void)
+{
+	sem_unlink("death");
+	sem_unlink("print");
+	sem_unlink("stop_eating");
+	g_data.flag_print = 1;
+	return (0);
 }

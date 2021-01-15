@@ -6,13 +6,13 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 07:37:32 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 08:01:58 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/15 22:58:14 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_two.h"
 
-int		delete_sem(void)
+int			delete_sem(void)
 {
 	sem_unlink("fork");
 	sem_unlink("death");
@@ -22,14 +22,14 @@ int		delete_sem(void)
 	return (0);
 }
 
-int		free_malloc(void)
+int			free_malloc(void)
 {
 	free(g_data.philo);
 	free(g_data.philo->thread);
 	return (-1);
 }
 
-void	init_tmp(t_philo *tmp, sem_t *fork, sem_t *stop_eating, size_t i)
+static void	init_tmp(t_philo *tmp, sem_t *fork, sem_t *stop_eating, size_t i)
 {
 	tmp->flag_print = 1;
 	tmp->number = i + 1;
@@ -39,7 +39,15 @@ void	init_tmp(t_philo *tmp, sem_t *fork, sem_t *stop_eating, size_t i)
 	tmp->stop_eating = stop_eating;
 }
 
-int		create_sem(sem_t *fork, sem_t *stop_eating)
+static int	protect_pthread(t_philo *tmp, size_t i)
+{
+	if (pthread_create(&g_data.philo->thread[i], NULL, function_philo_two,
+	&tmp[i]))
+		return (1);
+	return (0);
+}
+
+int			create_sem(sem_t *fork, sem_t *stop_eating)
 {
 	size_t		i;
 	t_philo		*tmp;
@@ -60,8 +68,8 @@ int		create_sem(sem_t *fork, sem_t *stop_eating)
 		tmp[i].death = death;
 		tmp[i].print = print;
 		gettimeofday(&tmp[i].start_time, NULL);
-		pthread_create(&g_data.philo->thread[i], NULL,
-		function_philo_two, &tmp[i]);
+		if (protect_pthread(tmp, i))
+			return (1);
 		++i;
 	}
 	return (0);
