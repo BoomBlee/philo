@@ -1,5 +1,5 @@
 
-#include "philo_two.h"
+#include "philo_three.h"
 
 t_data g_data;
 
@@ -78,12 +78,10 @@ void	*stop(void *two)
 
 void	function_eating(t_philo *tmp)
 {
-	sem_wait(tmp->fork);
 	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu has taken a fork\n", get_time(tmp->start_time), tmp->number);
 	sem_post(tmp->print);
-	sem_wait(tmp->fork);
 	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
 		printf("%lu %lu has taken a fork\n", get_time(tmp->start_time), tmp->number);
@@ -94,9 +92,7 @@ void	function_eating(t_philo *tmp)
 		printf("%lu %lu is eating\n", get_time(tmp->start_time), tmp->number);
 	sem_post(tmp->print);
 	while (g_data.time_to_eat > get_time(tmp->start_proc))
-		usleep(240);
-	sem_post(tmp->fork);
-	sem_post(tmp->fork);
+		usleep(340);
 }
 
 void	function_sleep(t_philo *tmp)
@@ -109,7 +105,7 @@ void	function_sleep(t_philo *tmp)
 		printf("%lu %lu is sleeping\n", get_time(tmp->start_time), tmp->number);
 	sem_post(tmp->print);
 	while (g_data.time_to_sleep > get_time(start_sleep))
-		usleep(240);
+		usleep(340);
 }
 
 void	function_think(t_philo *tmp)
@@ -127,25 +123,26 @@ void	*function_philo_one(void *star)
 	pthread_t	two;
 	size_t		count_eat;
 
+	sem_unlink("fork");
+	sem_unlink("death");
+	sem_unlink("print");
+	sem_unlink("stop_eating");
 	count_eat = 0;
 	tmp = star;
 	tmp->start_proc = tmp->start_time;
 	while (tmp->number % 2 && get_time(tmp->start_proc) < g_data.time_to_eat)
-		usleep(240);
+		usleep(340);
 	pthread_create(&one, NULL, death, tmp);
 	pthread_create(&two, NULL, stop, tmp);
-
 	while (tmp->life == 1)
 	{
 		function_eating(tmp);
 		if (++count_eat == g_data.number_of_eat)
-		{
-			sem_post(tmp->death);
 			break ;
-		}
 		function_sleep(tmp);
 		function_think(tmp);
 	}
+	sem_post(tmp->stop_eating);
 	tmp->life = 0;
 	pthread_join(one, NULL);
 	pthread_join(two, NULL);
@@ -155,9 +152,13 @@ void	*function_philo_one(void *star)
 void	*function_stop_eat(void *pid)
 {
 	t_philo		*tmp;
+	size_t		i;
 
 	tmp = pid;
-	sem_wait(tmp->stop_eating);
+	i = 0;
+	while (i++ < g_data.quantity_philo)
+		sem_wait(tmp->stop_eating);
+	sem_post(tmp->death);
 	return (NULL);
 }
 
@@ -167,23 +168,22 @@ int	main(int ac, char **av)
 	t_philo *tmp;
 	sem_t	*death;
 	sem_t	*print;
-	sem_t	*fork;
+	pid_t	*pid;
 	sem_t	*stop_eating;
 	pthread_t		stopped;
 
 	i = 0;
-	sem_unlink("fork");
-	sem_unlink("death");
-	sem_unlink("print");
-	sem_unlink("stop_eating");
 	if (parse_argv(ac, av) == -1)
 		return (-1);
 	// printf("philo=%ld, die=%ld, eat=%ld, sleep=%ld\n", g_data.quantity_philo, g_data.time_to_die, g_data.time_to_eat, g_data.time_to_sleep);
 	g_data.philo = malloc(g_data.quantity_philo * sizeof(t_philo));
 
+	sem_unlink("fork");
+	sem_unlink("death");
+	sem_unlink("print");
+	sem_unlink("stop_eating");
 
-	fork = sem_open("fork", O_CREAT, S_IRWXU, g_data.quantity_philo);
-	// , O_CREAT, S_IRWXU,
+	pid = malloc(g_data.quantity_philo * sizeof(pid_t));
 
 	g_data.philo->thread = malloc(g_data.quantity_philo * sizeof(pthread_t));
 
@@ -195,7 +195,6 @@ int	main(int ac, char **av)
 	g_data.flag_print = 1;
 	while (i < g_data.quantity_philo)
 	{
-		tmp[i].fork = fork;
 		tmp[i].stop_eating = stop_eating;
 		gettimeofday(&tmp[i].start_time, NULL);
 		tmp[i].flag_print = 1;
@@ -204,14 +203,21 @@ int	main(int ac, char **av)
 		tmp[i].death = death;
 		tmp[i].print = print;
 		tmp[i].time_of_life = g_data.time_to_die;
-		pthread_create(&g_data.philo->thread[i], NULL, function_philo_one, &tmp[i]);
+		pid[i] = fork();
+		if (pid[i] < 0)
+			return (-1);//free malloc
+		else if (pid[i] == 0)
+		{
+			function_philo_one(&tmp[i]);
+			exit (0);
+		}
 		++i;
 	}
 	i = 0;
 	pthread_create(&stopped, NULL, function_stop_eat, tmp);
 	while (i < g_data.quantity_philo)
 	{
-		pthread_join(g_data.philo->thread[i], NULL);
+		waitpid(pid[i], NULL, 0);
 		++i;
 	}
 	sem_unlink("fork");

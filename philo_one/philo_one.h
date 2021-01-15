@@ -1,11 +1,12 @@
 
+#ifndef PHILO_ONE
 # include <unistd.h>
 # include <pthread.h>
 # include <stdlib.h>
 # include <sys/time.h>
 # include <stdio.h>
 
-typedef struct	s_philo_one
+typedef struct		s_philo_one
 {
 	pthread_mutex_t *fork;
 	pthread_mutex_t print;
@@ -20,20 +21,42 @@ typedef struct	s_philo_one
 	struct timeval	start_proc;
 	size_t			count_eating;
 	short int		flag_print;
-}				t_philo;
+}					t_philo;
 
-typedef struct	s_data
+typedef	struct		s_data
 {
-	size_t	quantity_philo;
-	size_t	time_to_die;
-	size_t	time_to_eat;
-	size_t	time_to_sleep;
-	size_t	number_of_eat;
-	t_philo	*philo;
-	short int	flag_print;
-}				t_data;
-
-
-int				ft_atoi(const char *nptr);
-size_t			ft_strlen(const char *str);
-
+	size_t			quantity_philo;
+	size_t			time_to_die;
+	size_t			time_to_eat;
+	size_t			time_to_sleep;
+	size_t			number_of_eat;
+	t_philo			*philo;
+	short int		flag_print;
+}					t_data;
+/*
+*******************  main.c  *******************
+*/
+size_t	get_time(struct timeval t1);
+/*
+*******************  pars.c  *******************
+*/
+int					parse_argv(int ac, char **av);
+/*
+*******************  malloc_init.c  *******************
+*/
+int		ft_allocate(pthread_mutex_t **fork, pthread_mutex_t **stop_eating);
+int		free_malloc(pthread_mutex_t *fork, pthread_mutex_t *stop_eating);
+void	init_tmp(t_philo *tmp, pthread_mutex_t *fork, pthread_mutex_t *stop_eating, size_t i);
+int		create_mutex(pthread_mutex_t *fork, pthread_mutex_t *stop_eating);
+/*
+*******************  malloc_init.c  *******************
+*/
+void	*function_philo_one(void *star);
+/*
+*******************  malloc_init.c  *******************
+*/
+void	*stop(void *two);
+void	*death(void *one);
+void	*function_stop_eat(void *pid);
+t_data				g_data;
+# endif

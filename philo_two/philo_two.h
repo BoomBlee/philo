@@ -9,9 +9,9 @@
 typedef struct	s_philo_one
 {
 	sem_t *fork;
-	sem_t print;
-	sem_t death;
-	sem_t	stop_eating;
+	sem_t *print;
+	sem_t *death;
+	sem_t	*stop_eating;
 
 	pthread_t		*thread;
 	short int		life;
