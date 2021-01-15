@@ -6,18 +6,27 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 07:37:32 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 07:39:31 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/15 08:01:58 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_two.h"
 
-void	delete_sem(void)
+int		delete_sem(void)
 {
 	sem_unlink("fork");
 	sem_unlink("death");
 	sem_unlink("print");
 	sem_unlink("stop_eating");
+	g_data.flag_print = 1;
+	return (0);
+}
+
+int		free_malloc(void)
+{
+	free(g_data.philo);
+	free(g_data.philo->thread);
+	return (-1);
 }
 
 void	init_tmp(t_philo *tmp, sem_t *fork, sem_t *stop_eating, size_t i)

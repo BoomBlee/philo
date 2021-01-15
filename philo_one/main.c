@@ -6,7 +6,7 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 05:44:27 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 06:30:28 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/15 08:16:28 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int		main(int ac, char **av)
 	g_data.flag_print = 1;
 	if (parse_argv(ac, av))
 		return (-1);
-	if(ft_allocate(&fork, &stop_eating))
+	if (ft_allocate(&fork, &stop_eating))
 		return (free_malloc(fork, stop_eating));
 	if (create_mutex(fork, stop_eating))
 		return (free_malloc(fork, stop_eating));

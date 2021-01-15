@@ -1,7 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   function_eat_think_sleep.c                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/01/15 08:19:06 by kcaraway          #+#    #+#             */
+/*   Updated: 2021/01/15 08:27:50 by kcaraway         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "philo_one.h"
 
-void	function_eating(t_philo *tmp)
+static void		function_eating(t_philo *tmp)
 {
 	pthread_mutex_lock(&tmp->fork[tmp->number - 1]);
 	pthread_mutex_lock(&tmp->print);
@@ -30,7 +41,7 @@ void	function_eating(t_philo *tmp)
 	pthread_mutex_unlock(&tmp->fork[0]);
 }
 
-void	function_sleep(t_philo *tmp)
+static void		function_sleep(t_philo *tmp)
 {
 	struct timeval	start_sleep;
 
@@ -43,7 +54,7 @@ void	function_sleep(t_philo *tmp)
 		usleep(240);
 }
 
-void	function_think(t_philo *tmp)
+static void		function_think(t_philo *tmp)
 {
 	pthread_mutex_lock(&tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
@@ -51,7 +62,15 @@ void	function_think(t_philo *tmp)
 	pthread_mutex_unlock(&tmp->print);
 }
 
-void	*function_philo_one(void *star)
+static	void	*castil(t_philo *tmp, pthread_t one, pthread_t two)
+{
+	tmp->life = 0;
+	pthread_join(one, NULL);
+	pthread_join(two, NULL);
+	return (NULL);
+}
+
+void			*function_philo_one(void *star)
 {
 	t_philo		*tmp;
 	pthread_t	one;
@@ -77,8 +96,5 @@ void	*function_philo_one(void *star)
 		function_sleep(tmp);
 		function_think(tmp);
 	}
-	tmp->life = 0;
-	pthread_join(one, NULL);
-	pthread_join(two, NULL);
-	return (NULL);
+	return (castil);
 }

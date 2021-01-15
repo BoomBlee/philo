@@ -1,5 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_one.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/01/15 08:17:22 by kcaraway          #+#    #+#             */
+/*   Updated: 2021/01/15 08:18:07 by kcaraway         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#ifndef PHILO_ONE
+#ifndef PHILO_ONE_H
+# define PHILO_ONE_H
 # include <unistd.h>
 # include <pthread.h>
 # include <stdlib.h>
@@ -36,7 +48,7 @@ typedef	struct		s_data
 /*
 *******************  main.c  *******************
 */
-size_t	get_time(struct timeval t1);
+size_t				get_time(struct timeval t1);
 /*
 *******************  pars.c  *******************
 */
@@ -44,19 +56,23 @@ int					parse_argv(int ac, char **av);
 /*
 *******************  malloc_init.c  *******************
 */
-int		ft_allocate(pthread_mutex_t **fork, pthread_mutex_t **stop_eating);
-int		free_malloc(pthread_mutex_t *fork, pthread_mutex_t *stop_eating);
-void	init_tmp(t_philo *tmp, pthread_mutex_t *fork, pthread_mutex_t *stop_eating, size_t i);
-int		create_mutex(pthread_mutex_t *fork, pthread_mutex_t *stop_eating);
+int					ft_allocate(pthread_mutex_t **fork,
+pthread_mutex_t **stop_eating);
+int					free_malloc(pthread_mutex_t *fork,
+pthread_mutex_t *stop_eating);
+void				init_tmp(t_philo *tmp, pthread_mutex_t*fork,
+pthread_mutex_t *stop_eating, size_t i);
+int					create_mutex(pthread_mutex_t *fork,
+pthread_mutex_t *stop_eating);
 /*
 *******************  malloc_init.c  *******************
 */
-void	*function_philo_one(void *star);
+void				*function_philo_one(void *star);
 /*
 *******************  malloc_init.c  *******************
 */
-void	*stop(void *two);
-void	*death(void *one);
-void	*function_stop_eat(void *pid);
+void				*stop(void *two);
+void				*death(void *one);
+void				*function_stop_eat(void *pid);
 t_data				g_data;
-# endif
+#endif

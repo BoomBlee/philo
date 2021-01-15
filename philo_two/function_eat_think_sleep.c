@@ -6,13 +6,13 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 07:37:36 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 07:37:39 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/15 08:25:39 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_two.h"
 
-void	function_eating(t_philo *tmp)
+static void		function_eating(t_philo *tmp)
 {
 	sem_wait(tmp->fork);
 	sem_wait(tmp->print);
@@ -37,7 +37,7 @@ void	function_eating(t_philo *tmp)
 	sem_post(tmp->fork);
 }
 
-void	function_sleep(t_philo *tmp)
+static void		function_sleep(t_philo *tmp)
 {
 	struct timeval	start_sleep;
 
@@ -50,7 +50,7 @@ void	function_sleep(t_philo *tmp)
 		usleep(240);
 }
 
-void	function_think(t_philo *tmp)
+static void		function_think(t_philo *tmp)
 {
 	sem_wait(tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
@@ -58,7 +58,15 @@ void	function_think(t_philo *tmp)
 	sem_post(tmp->print);
 }
 
-void	*function_philo_two(void *star)
+static	void	*castil(t_philo *tmp, pthread_t one, pthread_t two)
+{
+	tmp->life = 0;
+	pthread_join(one, NULL);
+	pthread_join(two, NULL);
+	return (NULL);
+}
+
+void			*function_philo_two(void *star)
 {
 	t_philo		*tmp;
 	pthread_t	one;
@@ -84,8 +92,5 @@ void	*function_philo_two(void *star)
 		function_sleep(tmp);
 		function_think(tmp);
 	}
-	tmp->life = 0;
-	pthread_join(one, NULL);
-	pthread_join(two, NULL);
-	return (NULL);
+	return (castil);
 }
