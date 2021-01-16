@@ -6,7 +6,7 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 07:36:52 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 22:40:59 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/16 03:24:00 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ int		main(int ac, char **av)
 	pid_t	*pid;
 	sem_t	*stop_eating;
 
+	stop_eating = NULL;
 	i = delete_sem();
 	if (parse_argv(ac, av))
 		return (-1);

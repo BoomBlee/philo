@@ -6,7 +6,7 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 08:19:06 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 08:27:50 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/16 03:22:40 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ static void		function_eating(t_philo *tmp)
 	gettimeofday(&tmp->start_proc, NULL);
 	pthread_mutex_lock(&tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
-		printf("%lu %lu is eating\n", get_time(tmp->start_time), tmp->number);
+		printf("%lu %lu \033[32mis eating\033[0m\n", get_time(tmp->start_time), tmp->number);
 	pthread_mutex_unlock(&tmp->print);
 	while (g_data.time_to_eat > get_time(tmp->start_proc))
 		usleep(240);
@@ -48,7 +48,7 @@ static void		function_sleep(t_philo *tmp)
 	gettimeofday(&start_sleep, NULL);
 	pthread_mutex_lock(&tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
-		printf("%lu %lu is sleeping\n", get_time(tmp->start_time), tmp->number);
+		printf("%lu %lu \033[33mis sleeping\033[0m\n", get_time(tmp->start_time), tmp->number);
 	pthread_mutex_unlock(&tmp->print);
 	while (g_data.time_to_sleep > get_time(start_sleep))
 		usleep(240);
@@ -58,7 +58,7 @@ static void		function_think(t_philo *tmp)
 {
 	pthread_mutex_lock(&tmp->print);
 	if (tmp->flag_print == 1 && g_data.flag_print == 1)
-		printf("%lu %lu is thinking\n", get_time(tmp->start_time), tmp->number);
+		printf("%lu %lu \033[36mis thinking\033[0m\n", get_time(tmp->start_time), tmp->number);
 	pthread_mutex_unlock(&tmp->print);
 }
 

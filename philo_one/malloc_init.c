@@ -6,7 +6,7 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 08:18:28 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 08:18:30 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/16 02:47:38 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,7 @@ int		free_malloc(pthread_mutex_t *fork, pthread_mutex_t *stop_eating)
 	return (-1);
 }
 
-void	init_tmp(t_philo *tmp, pthread_mutex_t *fork,
-	pthread_mutex_t *stop_eating, size_t i)
+void	init_tmp(t_philo *tmp, pthread_mutex_t *fork, size_t i)
 {
 	tmp->fork = fork;
 	tmp->flag_print = 1;
@@ -75,7 +74,7 @@ int		create_mutex(pthread_mutex_t *fork, pthread_mutex_t *stop_eating)
 	{
 		tmp[i].death = death;
 		tmp[i].print = print;
-		init_tmp(&tmp[i], fork, stop_eating, i);
+		init_tmp(&tmp[i], fork, i);
 		tmp[i].stop_eating = stop_eating[i];
 		if (pthread_create(&g_data.philo->thread[i], NULL, function_philo_one,
 		&tmp[i]) || gettimeofday(&tmp[i].start_time, NULL) ||

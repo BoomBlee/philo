@@ -6,7 +6,7 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 08:17:22 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 08:18:07 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/16 02:47:08 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,7 @@ int					ft_allocate(pthread_mutex_t **fork,
 pthread_mutex_t **stop_eating);
 int					free_malloc(pthread_mutex_t *fork,
 pthread_mutex_t *stop_eating);
-void				init_tmp(t_philo *tmp, pthread_mutex_t*fork,
-pthread_mutex_t *stop_eating, size_t i);
+void				init_tmp(t_philo *tmp, pthread_mutex_t*fork, size_t i);
 int					create_mutex(pthread_mutex_t *fork,
 pthread_mutex_t *stop_eating);
 /*

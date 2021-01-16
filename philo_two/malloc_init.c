@@ -6,7 +6,7 @@
 /*   By: kcaraway <kcaraway@student.21-school.r>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/15 07:37:32 by kcaraway          #+#    #+#             */
-/*   Updated: 2021/01/15 22:58:14 by kcaraway         ###   ########.fr       */
+/*   Updated: 2021/01/16 03:15:32 by kcaraway         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ static void	init_tmp(t_philo *tmp, sem_t *fork, sem_t *stop_eating, size_t i)
 
 static int	protect_pthread(t_philo *tmp, size_t i)
 {
+	g_data.flag_print = 1;
 	if (pthread_create(&g_data.philo->thread[i], NULL, function_philo_two,
 	&tmp[i]))
 		return (1);
@@ -61,7 +62,8 @@ int			create_sem(sem_t *fork, sem_t *stop_eating)
 	print = sem_open("print", O_CREAT, S_IRWXU, 1);
 	stop_eating = sem_open("stop_eating", O_CREAT, S_IRWXU, 0);
 	tmp = g_data.philo;
-	g_data.flag_print = 1;
+	if (pthread_create(&stopped, NULL, function_stop_eat, tmp))
+		return (1);
 	while (i < g_data.quantity_philo)
 	{
 		init_tmp(&tmp[i], fork, stop_eating, i);
